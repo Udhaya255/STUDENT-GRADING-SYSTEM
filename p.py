@@ -43,7 +43,17 @@ while True:
                 ranklist()
             
         elif choice == 3:
-               print("underprocessing")   
+            print("+-----------------+")
+            print("|      update     |")
+            print("+-----------------+")
+            print("| 1. studentrecord|")
+            print("| 2. studentmarks |")
+            print("+-----------------+")
+            sub_choice = int(input("Enter a no. 1-2: "))
+            if sub_choice == 1:
+                update_studentrecord()
+            else:
+                update_smark()  
             
         elif choice == 4:  
             print("+-----------------+")
@@ -150,4 +160,32 @@ def delete_smark():
     s_id = int(input("Enter student id to delete marks: "))
     sql = "DELETE FROM smark WHERE s_id = %s"
     cursor.execute(sql, (s_id,))
-    conn.commit()        
+    conn.commit()    
+def update_studentrecord():
+    s_id = int(input("Enter student id to update record: "))
+    print("Enter new details:")
+    sname = input("Enter name: ")
+    s_class=input("Enter class: ")
+    section=input("Enter section: ")
+    father_name=input("Enter father's name: ")
+    mother_name=input("Enter mother's name: ")
+    dob=input("Enter date of birth (YYYY-MM-DD): ")
+    address=input("Enter address: ")
+    phone_no=input("Enter phone no.: ") 
+    sql = "UPDATE studentrecord SET sname=%s, father_name=%s, mother_name=%s, dob=%s, address=%s, phone_no=%s, s_class=%s, section=%s WHERE s_id=%s"
+    val = (sname, father_name, mother_name, dob, address, phone_no, s_class, section, s_id)
+    cursor.execute(sql, val)
+    conn.commit()
+def update_smark():
+    s_id = int(input("Enter student id to update marks: "))
+    print("Enter new marks:")
+    physics=int(input("Enter physics marks: "))
+    chemistry=int(input("Enter chemistry marks: "))
+    english=int(input("Enter english marks: "))
+    maths=int(input("Enter maths marks: "))
+    computer=int(input("Enter computer marks: "))
+    ai=int(input("Enter ai marks: "))
+    sql = "UPDATE smark SET physics=%s, chemistry=%s, english=%s, maths=%s, computer=%s, ai=%s WHERE s_id=%s"
+    val = (physics, chemistry, english, maths, computer, ai, s_id)
+    cursor.execute(sql, val)
+    conn.commit()
