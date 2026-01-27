@@ -1,10 +1,12 @@
 import mysql.connector as mysql
+from tabulate import tabulate 
 
 try:
     conn = mysql.connect(
         host="localhost",
         user="root",
-        password="1949",
+        # password="1949",
+        password="",
         database="data"
     )
     if conn.is_connected():
@@ -29,6 +31,7 @@ def add_studentrecord():
     val = (s_id, sname, father_name, mother_name, dob, address, phone_no, s_class, section)
     cursor.execute(sql, val)
     conn.commit()
+    print(" Details added successfully.")
 
 def add_smark():
     s_id = int(input("Enter student id: "))
@@ -43,14 +46,16 @@ def add_smark():
     cursor.execute(sql, val)
     conn.commit() 
 
+# View details
 def view_studentrecord():
     s_id = int(input("Enter student id to view record: "))
     sql = "SELECT * FROM studentrecord WHERE s_id = %s"
     cursor.execute(sql, (s_id,)) # Fixed tuple syntax
-    row = cursor.fetchone()
+    row = cursor.fetchall()
     if row:
-        print("s_id | sname | s_class | section | father_name | mother_name | dob | address | phone_no")
-        print(row)
+        # print("s_id | sname | s_class | section | father_name | mother_name | dob | address | phone_no")
+        # print(row)
+        print(tabulate(row, headers=["s_id" , "sname" , "s_class" , "section" , "father_name" , "mother_name" , "dob" , "address" , "phone_no"]))
     else:
         print("No record found.")
     
@@ -81,10 +86,16 @@ def report_card():
         print("No marks found for this ID.")
 
 def ranklist():
-    sql = "SELECT s_id, (physics + chemistry + english + maths + computer + ai) AS total_marks FROM smark ORDER BY total_marks DESC"
-    cursor.execute(sql)
+    s_class = input("Enter class: ")
+    s_section = input("Enter section: ")
+    sql = "SELECT smark.s_id, sname, (physics + chemistry + english + maths + computer + ai) AS total_marks, ROUND((physics + chemistry + english + maths + computer + ai)/6,2) FROM smark JOIN studentrecord on studentrecord.s_id = smark.s_id where s_class= %s and section = %s ORDER BY total_marks DESC"
+    cursor.execute(sql, [s_class,s_section])
     rows = cursor.fetchall()
-    print(rows)
+    # print(rows)
+    if rows:
+        print(tabulate(rows, headers=["ID" , "Name" , "Marks" , "Percentage"]))
+    else:
+        print("No records found")
 
 def delete_studentrecord():
     s_id = int(input("Enter student id to delete record: "))
