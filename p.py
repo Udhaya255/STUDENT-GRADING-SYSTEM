@@ -5,13 +5,12 @@ try:
     conn = mysql.connect(
         host="localhost",
         user="root",
-        # password="1949",
-        password="",
+        password="1949",
         database="data"
     )
     if conn.is_connected():
         print("Connected to MySQL database")
-        cursor = conn.cursor() # Moved inside to prevent crash if connection fails
+        cursor = conn.cursor() 
     else:
         print("Connection failed")
 except mysql.connector.Error as err:
@@ -27,7 +26,7 @@ def add_studentrecord():
     dob = input("Enter date of birth (YYYY-MM-DD): ")
     address = input("Enter address: ")
     phone_no = input("Enter phone no.: ") 
-    sql = "INSERT INTO studentrecord (s_id, sname, father_name, mother_name, dob, address, phone_no, s_class, section) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    sql = "INSERT INTO studentrecords (id, sname, fathername, mothername, DOB, address, contact, class, section) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
     val = (s_id, sname, father_name, mother_name, dob, address, phone_no, s_class, section)
     cursor.execute(sql, val)
     conn.commit()
@@ -41,15 +40,17 @@ def add_smark():
     maths = int(input("Enter maths marks: "))
     computer = int(input("Enter computer marks: "))
     ai = int(input("Enter ai marks: "))
-    sql = "INSERT INTO smark (s_id, physics, chemistry, english, maths, computer, ai) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    sql = "INSERT INTO smark (id, physics, chemistry, english, math, cs, ai) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     val = (s_id, physics, chemistry, english, maths, computer, ai)
     cursor.execute(sql, val)
     conn.commit() 
+    print(" MARKS added successfully.")
+
 
 # View details
 def view_studentrecord():
     s_id = int(input("Enter student id to view record: "))
-    sql = "SELECT * FROM studentrecord WHERE s_id = %s"
+    sql = "SELECT * FROM studentrecords WHERE id = %s"
     cursor.execute(sql, (s_id,)) # Fixed tuple syntax
     row = cursor.fetchall()
     if row:
@@ -59,16 +60,17 @@ def view_studentrecord():
     else:
         print("No record found.")
     
-
+#to fix report card pending issue
 def report_card():
     s_id = int(input("Enter student id to view report card: "))
-    sql = "SELECT * FROM smark WHERE s_id = %s"
+    sql = "SELECT * FROM smark WHERE id = %s"
     cursor.execute(sql, (s_id,))
     row = cursor.fetchone()
     
-    if row: # Added check to prevent crash if student id doesn't exist
-        print(" s_id  physics  chemistry  english  maths  computer  ai")
-        print(row)
+    if row: 
+      #  print(" s_id  physics  chemistry  english  maths  computer  ai")
+       # print(row)
+        print(tabulate([row], headers=["s_id" , "physics" , "chemistry" , "english" , "maths" , "computer" , "ai"]))
         total = sum(row[1:])
         print("Total:", total)
         Percentage = total / 6
@@ -88,7 +90,7 @@ def report_card():
 def ranklist():
     s_class = input("Enter class: ")
     s_section = input("Enter section: ")
-    sql = "SELECT smark.s_id, sname, (physics + chemistry + english + maths + computer + ai) AS total_marks, ROUND((physics + chemistry + english + maths + computer + ai)/6,2) FROM smark JOIN studentrecord on studentrecord.s_id = smark.s_id where s_class= %s and section = %s ORDER BY total_marks DESC"
+    sql = "SELECT smark.id, sname, (physics + chemistry + english + math + cs + ai) AS total_marks, ROUND((physics + chemistry + english + math + cs + ai)/6,2) FROM smark JOIN studentrecords on studentrecords.id = smark.id where class= %s and section = %s ORDER BY total_marks DESC"
     cursor.execute(sql, [s_class,s_section])
     rows = cursor.fetchall()
     # print(rows)
@@ -99,15 +101,19 @@ def ranklist():
 
 def delete_studentrecord():
     s_id = int(input("Enter student id to delete record: "))
-    sql = "DELETE FROM studentrecord WHERE s_id = %s"
+    sql = "DELETE FROM studentrecords WHERE id = %s"
     cursor.execute(sql, (s_id,))
     conn.commit()
+    print(" STUDENT RECORD DELETED successfully.")
+
 
 def delete_smark():
     s_id = int(input("Enter student id to delete marks: "))
-    sql = "DELETE FROM smark WHERE s_id = %s"
+    sql = "DELETE FROM smark WHERE id = %s"
     cursor.execute(sql, (s_id,))
-    conn.commit()    
+    conn.commit()
+    print(" STUDENT MARKS DELETED successfully.")
+    
 
 def update_studentrecord():
     s_id = int(input("Enter student id to update record: "))
@@ -120,10 +126,12 @@ def update_studentrecord():
     dob = input("Enter date of birth (YYYY-MM-DD): ")
     address = input("Enter address: ")
     phone_no = input("Enter phone no.: ") 
-    sql = "UPDATE studentrecord SET sname=%s, father_name=%s, mother_name=%s, dob=%s, address=%s, phone_no=%s, s_class=%s, section=%s WHERE s_id=%s"
+    sql = "UPDATE studentrecords SET sname=%s, fathername=%s, mothername=%s, DOB=%s, address=%s, contact=%s, class=%s, section=%s WHERE id=%s"
     val = (sname, father_name, mother_name, dob, address, phone_no, s_class, section, s_id)
     cursor.execute(sql, val)
     conn.commit()
+    print(" STUDENT  RECORD UPDATE successfully.")
+
 
 def update_smark():
     s_id = int(input("Enter student id to update marks: "))
@@ -134,10 +142,11 @@ def update_smark():
     maths = int(input("Enter maths marks: "))
     computer = int(input("Enter computer marks: "))
     ai = int(input("Enter ai marks: "))
-    sql = "UPDATE smark SET physics=%s, chemistry=%s, english=%s, maths=%s, computer=%s, ai=%s WHERE s_id=%s"
+    sql = "UPDATE smark SET physics=%s, chemistry=%s, english=%s, math=%s, cs=%s, ai=%s WHERE id=%s"
     val = (physics, chemistry, english, maths, computer, ai, s_id)
     cursor.execute(sql, val)
     conn.commit()
+    print(" STUDENT MARKS UPDATE successfully.")
 
 while True:
     print("+--------------------+")
